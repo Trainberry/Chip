@@ -11,19 +11,23 @@ import (
 )
 
 func StartServer() {
-	listener, err := stacks.NewTCPListener(setup.PortStack, stacks.TCPListenerConfig{
+	var err error
+	var listener *stacks.TCPListener
+
+	listenerConfig := stacks.TCPListenerConfig{
 		MaxConnections: 2,
 		ConnTxBufSize:  2030,
 		ConnRxBufSize:  2030,
-	})
-	if err != nil {
-		setup.Logger.Error("Error while creating listener: " + err.Error())
-		panic("listener create:" + err.Error())
 	}
 
-	if err = listener.StartListening(80); err != nil {
-		setup.Logger.Error("Error while starting to listen: " + err.Error())
-		panic("listener start:" + err.Error())
+	for listener, err = stacks.NewTCPListener(setup.PortStack, listenerConfig) ; err != nil ; {
+		setup.Logger.Error("Error while creating listener: " + err.Error() + ". Will try again in 5 seconds")
+		time.Sleep(time.Second * 5)
+	}
+
+	for err = listener.StartListening(80); err != nil ; {
+		setup.Logger.Error("Error while starting to listen: " + err.Error() + ". Will try again in 5 seconds")
+		time.Sleep(time.Second * 5)
 	}
 
 	// Reuse the same buffers for each connection to avoid heap allocations.
