@@ -1,0 +1,76 @@
+openapi: 3.0.1
+info:
+  title: Chip API - v1.0.0
+  description: A (very) lightweight API to control your Pico abroad a train!
+  contact:
+    email: hello@florian.forestier.re
+  version: 1.0.0
+externalDocs:
+  description: Find out more about the project!
+  url: 'https://forestier.re'
+paths:
+  /state:
+    get:
+      summary: Get current state of the train
+      tags:
+        - health
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  speed:
+                    type: integer
+                    format: int64
+                    example: 10
+                  isGoingForward:
+                    type: boolean
+                  lightsActivated:
+                    type: boolean
+  /ping:
+    get:
+      summary: Ping!
+      tags:
+        - health
+      responses:
+        '204':
+          description: Pong!
+  /lights:
+    post:
+      summary: Enable lights
+      tags:
+        - lights
+      responses:
+        '204':
+          description: OK
+    delete:
+      summary: Disable lights
+      tags:
+        - lights
+      responses:
+        '204':
+          description: OK
+  /speed:
+    post:
+      summary: Update speed and direction
+      tags:
+        - speed
+      parameters:
+        - name: Speed
+          in: header
+          description: Speed in percentage (0-100)
+          required: true
+          schema:
+            type: integer
+        - name: Direction
+          in: header
+          description: The direction (1 = forward ; 0 = backward)
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: OK
