@@ -40,13 +40,27 @@ func RegisterTrain() {
 	conn.SetDeadline(time.Now().Add(time.Second * 10))
 
 	// Open connection
-	for err = conn.OpenDialTCP(clientAddr.Port(), configuration.ServerMAC, svAddr, seqs.Value(64632));  err != nil ; {
+
+	if err = conn.OpenDialTCP(clientAddr.Port(), configuration.ServerMAC, svAddr, seqs.Value(64632)) ; err != nil {
 		setup.Logger.Error("Unable to connect to central server: " + err.Error() + ". Will try again in 5 seconds")
 		time.Sleep(time.Second * 5)
+		conn.Close()
+		RegisterTrain()
+		return
 	}
 
-	for conn.State() != seqs.StateEstablished {
+	count := 0
+	for conn.State() != seqs.StateEstablished && count < 50 { 
 		time.Sleep(100 * time.Millisecond)
+		count += 1
+	}
+	
+	if conn.State() != seqs.StateEstablished {
+		setup.Logger.Error("Connection is still unestablished after 5 seconds waiting ; restarting TCP transaction now.")
+		conn.SetDeadline(time.Now().Add(time.Second * 10))
+		conn.Close()
+		RegisterTrain()
+		return
 	}
 
 	// Send the request.
