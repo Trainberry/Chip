@@ -25,4 +25,5 @@ func setSpeed(respWriter io.Writer, resp *httpx.ResponseHeader, req *httpx.Reque
 		controls.SetDirection(false)
 	}
 	resp.SetStatusCode(204)
+	respWriter.Write(resp.Header())
 }

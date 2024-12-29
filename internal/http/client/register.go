@@ -28,7 +28,7 @@ func RegisterTrain() {
 	// Set-up port and create connection
 	rng := rand.New(rand.NewSource(int64(time.Now().Sub(start))))
 
-	clientAddr := netip.AddrPortFrom(setup.PortStack.Addr(), uint16(rng.Intn(65535-4096)+4096))
+	clientAddr := netip.AddrPortFrom(setup.PortStack.Addr(), uint16(rng.Intn(65535-16636)+16636))
 
 	for conn, err = stacks.NewTCPConn(setup.PortStack, stacks.TCPConnConfig{}) ; err != nil ; {
 		setup.Logger.Error("Error while creating TCP connection: " + err.Error() + ". Will try again in 5 seconds")
@@ -46,7 +46,7 @@ func RegisterTrain() {
 
 	// Open connection
 
-	if err = conn.OpenDialTCP(clientAddr.Port(), configuration.ServerMAC, svAddr, seqs.Value(uint16(rng.Intn(65535-4096)+4096))) ; err != nil {
+	if err = conn.OpenDialTCP(clientAddr.Port(), configuration.ServerMAC, svAddr, seqs.Value(uint16(rng.Intn(65535-16636)+16636))) ; err != nil {
 		setup.Logger.Error("Unable to connect to central server: " + err.Error() + ". Will try again in 5 seconds")
 		time.Sleep(time.Second * 5)
 		conn.Close()

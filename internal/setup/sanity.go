@@ -47,7 +47,7 @@ func checkAlive() error {
 
 	// Set-up port and create connection
 	rng := rand.New(rand.NewSource(int64(time.Now().Sub(start))))
-	clientAddr := netip.AddrPortFrom(PortStack.Addr(), uint16(rng.Intn(65535-4096)+4096))
+	clientAddr := netip.AddrPortFrom(PortStack.Addr(), uint16(rng.Intn(65535-16636)+16636))
 
 	for conn, err = stacks.NewTCPConn(PortStack, stacks.TCPConnConfig{}) ; err != nil ; {
 		return errors.New("1: " + err.Error())
@@ -57,7 +57,7 @@ func checkAlive() error {
 	conn.SetDeadline(time.Now().Add(time.Second * 1))
 
 	// Open connection
-	if err = conn.OpenDialTCP(clientAddr.Port(), configuration.ServerMAC, svAddr, seqs.Value(uint16(rng.Intn(65535-4096)+4096))) ; err != nil {
+	if err = conn.OpenDialTCP(clientAddr.Port(), configuration.ServerMAC, svAddr, seqs.Value(uint16(rng.Intn(65535-16636)+16636))) ; err != nil {
 		return errors.New("2: " + err.Error())
 	}
 

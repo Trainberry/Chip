@@ -14,4 +14,5 @@ func setLights(respWriter io.Writer, resp *httpx.ResponseHeader, req *httpx.Requ
 		controls.SetLedState(false)
 	}
 	resp.SetStatusCode(204)
+	respWriter.Write(resp.Header())
 }
