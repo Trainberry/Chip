@@ -2,10 +2,16 @@ package controls
 
 import (
 	"chip/internal/setup"
+	"chip/internal/configuration"
 )
 
 // SetSpeed defines the speed percentage for the train.
 func SetSpeed(speed uint32) {
+
+	if speed != 0 && speed < configuration.MinSpeedToPropulse {
+		speed = configuration.MinSpeedToPropulse
+	}
+
 	// Sanitize if required
 	if speed > 100 {
 		speed = 100

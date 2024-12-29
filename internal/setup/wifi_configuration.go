@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/soypat/cyw43439"
+	"chip/internal/configuration"
 
 	"github.com/soypat/seqs/stacks"
 )
@@ -43,8 +44,17 @@ func setupWiFi(piDevice *cyw43439.Device, cfg WiFiSetupConfig) (*stacks.PortStac
 		MaxOpenPortsUDP: int(cfg.UDPPorts),
 		MaxOpenPortsTCP: int(cfg.TCPPorts),
 		MTU:             mtu,
-		Logger: Logger,
 	})
+
+	if configuration.Debug {
+		stack = stacks.NewPortStack(stacks.PortStackConfig{
+			MAC:             mac,
+			MaxOpenPortsUDP: int(cfg.UDPPorts),
+			MaxOpenPortsTCP: int(cfg.TCPPorts),
+			MTU:             mtu,
+			Logger:          Logger,
+		})
+	}
 
 
 	piDevice.RecvEthHandle(stack.RecvEth)
@@ -74,10 +84,7 @@ func nicLoop(dev *cyw43439.Device, Stack *stacks.PortStack) {
 		stallRx := true
 		// Poll for incoming packets.
 		for i := 0; i < 1; i++ {
-			gotPacket, err := dev.PollOne()
-			if err != nil {
-				Logger.Error("poll error: " + err.Error())
-			}
+			gotPacket, _ := dev.PollOne()
 			if !gotPacket {
 				break
 			}

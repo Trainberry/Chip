@@ -7,11 +7,14 @@ import (
 	"github.com/soypat/seqs"
 	"github.com/soypat/seqs/stacks"
 	"chip/internal/setup"
+	"math/rand"
 	"chip/internal/configuration"
 )
 
 // RegisterTrain creates a TCP connection to central server and tells him that a new train is alive
 func RegisterTrain() {
+	start := time.Now()
+
 	var err error
 	var conn *stacks.TCPConn
 	var svAddr netip.AddrPort
@@ -23,7 +26,9 @@ func RegisterTrain() {
 	}
 
 	// Set-up port and create connection
-	clientAddr := netip.AddrPortFrom(setup.PortStack.Addr(), uint16(64632))
+	rng := rand.New(rand.NewSource(int64(time.Now().Sub(start))))
+
+	clientAddr := netip.AddrPortFrom(setup.PortStack.Addr(), uint16(rng.Intn(65535-4096)+4096))
 
 	for conn, err = stacks.NewTCPConn(setup.PortStack, stacks.TCPConnConfig{}) ; err != nil ; {
 		setup.Logger.Error("Error while creating TCP connection: " + err.Error() + ". Will try again in 5 seconds")
@@ -41,7 +46,7 @@ func RegisterTrain() {
 
 	// Open connection
 
-	if err = conn.OpenDialTCP(clientAddr.Port(), configuration.ServerMAC, svAddr, seqs.Value(64632)) ; err != nil {
+	if err = conn.OpenDialTCP(clientAddr.Port(), configuration.ServerMAC, svAddr, seqs.Value(uint16(rng.Intn(65535-4096)+4096))) ; err != nil {
 		setup.Logger.Error("Unable to connect to central server: " + err.Error() + ". Will try again in 5 seconds")
 		time.Sleep(time.Second * 5)
 		conn.Close()

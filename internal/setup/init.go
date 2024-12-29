@@ -18,7 +18,10 @@ func init() {
 
 	dev := cyw43439.NewPicoWDevice()
 	cfg := cyw43439.DefaultWifiConfig()
-	cfg.Logger = Logger
+
+	if configuration.Debug {
+		cfg.Logger = Logger
+	}
 
 	for err = dev.Init(cfg) ; err != nil ; {
 		Logger.Error("Error on init: " + err.Error() + ". Will try again in 5 seconds")
@@ -76,5 +79,14 @@ func init() {
 	if err != nil {
 		Logger.Error("Error on LedChannel init: " + err.Error())
 	}
+
+	// Configure watchdog and sanity
+    machine.Watchdog.Configure(machine.WatchdogConfig{
+		TimeoutMillis: machine.WatchdogMaxTimeout, // Approx 8s. See https://tinygo.org/docs/reference/microcontrollers/machine/pico 
+	})
+
+	machine.Watchdog.Start()
+
+	go sanity()
 
 }
