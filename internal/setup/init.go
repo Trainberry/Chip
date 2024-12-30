@@ -9,12 +9,22 @@ import (
 )
 
 func init() {
+
+	// Configure watchdog and sanity
+    machine.Watchdog.Configure(machine.WatchdogConfig{
+		TimeoutMillis: machine.WatchdogMaxTimeout, // Approx 8s. See https://tinygo.org/docs/reference/microcontrollers/machine/pico 
+	})
+
+	machine.Watchdog.Start()
+
 	var err error
 
 	//--- Init RPi-Pico configuration
 	Logger = slog.New(slog.NewTextHandler(machine.Serial, &slog.HandlerOptions{
 		Level: slog.LevelInfo,
 	}))
+
+	machine.Watchdog.Update()
 
 	dev := cyw43439.NewPicoWDevice()
 	cfg := cyw43439.DefaultWifiConfig()
@@ -23,10 +33,14 @@ func init() {
 		cfg.Logger = Logger
 	}
 
+	machine.Watchdog.Update()
+
 	for err = dev.Init(cfg) ; err != nil ; {
 		Logger.Error("Error on init: " + err.Error() + ". Will try again in 5 seconds")
 		time.Sleep(time.Second * 5)
 	}
+
+	machine.Watchdog.Update()
 
 	//--- Setup WiFi
 
@@ -45,6 +59,8 @@ func init() {
 		time.Sleep(time.Second * 5)
 	}
 
+	machine.Watchdog.Update()
+
 	//--- Set built-in LED on to have a live notification
 	dev.GPIOSet(0, true)
 
@@ -60,6 +76,8 @@ func init() {
 		Logger.Error("Error on DirectionChannel init: " + err.Error())
 	}
 
+	machine.Watchdog.Update()
+
 	// Speed
 	SpeedPWM.Configure(machine.PWMConfig{
 		Period: 1e9/500,
@@ -69,6 +87,8 @@ func init() {
 	if err != nil {
 		Logger.Error("Error on SpeedChannel init: " + err.Error())
 	}
+
+	machine.Watchdog.Update()
 
 	// Led
 	LedPWM.Configure(machine.PWMConfig{
@@ -80,12 +100,7 @@ func init() {
 		Logger.Error("Error on LedChannel init: " + err.Error())
 	}
 
-	// Configure watchdog and sanity
-    machine.Watchdog.Configure(machine.WatchdogConfig{
-		TimeoutMillis: machine.WatchdogMaxTimeout, // Approx 8s. See https://tinygo.org/docs/reference/microcontrollers/machine/pico 
-	})
-
-	machine.Watchdog.Start()
+	machine.Watchdog.Update()
 
 	go sanity()
 
