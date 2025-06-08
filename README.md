@@ -1,32 +1,31 @@
-# Train Chip
+# Trainberry - Puce embarquée
 
-**This code is made for Raspberry Pi Pico W. It may not work with other chips.**
+**Ce code est conçu pour le RPi Pico W. Il pourrait ne pas fonctionner sur d'autres cartes.**
 
-This projet contains the code that will go on the Pico located in the train.
+Ce projet contient le code à déployer sur les cartes embarquées.
 
 ## Quick start
 
 ### Configuration
 
-First of all, you must set the configuration for your board : Train IP, Name, model, WiFi settings, and so on. The easiest way is to copy the `internal/configuration/configuration.go.template` to `internal/configuration/configuration.go`, and then edit values with your own.
+Tout d'abord, vous devez configurer votre carte : IP du train, nom, modèle, paramètres Wi-Fi, etc. Le moyen le plus simple est de copier le fichier internal/configuration/configuration.go.template vers internal/configuration/configuration.go, puis de modifier les valeurs avec les vôtres.
 
-As there is a lot of problems with ARP requests on Pico W, you must also provide by yourself the MAC address of the central server, in hex format. For example, if the MAC adress of the central server is `ab:cd:ef:01:02:03`, the `ServerMAC` should be `[6]byte{0xAB, 0xCD, 0xEF, 0x01, 0x02, 0x03}`. Easy, isn't it?
-
+Comme il y a beaucoup de problèmes avec les requêtes ARP sur le Pico W, vous devez également fournir vous-même l'adresse MAC du serveur central, au format hexadécimal. Par exemple, si l'adresse MAC du serveur central est ab:cd:ef:01:02:03, la variable ServerMAC devra être [6]byte{0xAB, 0xCD, 0xEF, 0x01, 0x02, 0x03}.
 ### Flash
 
-To flash, you have to specify your target and a specific `stack-size` :
+Pour flasher, vous devez spécifier votre cible et une stack-size spécifique :
 
 ```sh
 tinygo flash -target=pico -stack-size=16kb -monitor  ./cmd
 ```
 
-Tested with TinyGo v0.33.0.
+Testé avec TinyGo v0.33.0.
 
-## General usage
+## Utilisation générale
 
-On start, the chip will connect against the WiFi network and request his own IP. For performance reason, there is no "fancy" network stuff (no DHCP, no DNS, ...).
+Au démarrage, la puce se connecte au réseau Wi-Fi et demande sa propre IP. Pour des raisons de performance, il n’y a pas de traitement réseau "complexe" (pas de DHCP, pas de DNS, etc.).
 
-When connected, the chip will perform a `POST /register` request on the central server, with a JSON-formatted payload which looks like this:
+Une fois connectée, la puce effectue une requête `POST /register` vers le serveur central, avec une charge utile au format JSON ressemblant à ceci :
 
 ```json
 {
@@ -36,10 +35,10 @@ When connected, the chip will perform a `POST /register` request on the central 
 }
 ```
 
-The chip is now ready to accept new connections to verify state or change status.
+La puce est alors prête à accepter de nouvelles connexions pour vérifier son état ou modifier son statut.
 
 ## API
 
-The chip exposes an API on port `80/tcp`. For performance reason, there is no authentication or anything else like this. We highly recommend to use a dedicated WiFi network for your train infrastructure (a very old 100Mbps WiFi router will be quite enough).
+La puce expose une API sur le port `80/tcp`. Pour des raisons de performance, il n’y a ni authentification ni autre mécanisme de sécurité. Il est fortement recommandé d’utiliser un réseau Wi-Fi dédié pour votre infrastructure ferroviaire (un vieux routeur Wi-Fi 100 Mbps suffit largement).
 
-The whole reference is available in the `api` folder.
+L’ensemble de la documentation de référence est disponible dans le dossier `api`.
