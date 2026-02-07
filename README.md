@@ -10,7 +10,7 @@ This project contains the code to deploy on train chip.
 
 The first version of the project was using a Raspberry Pi Zero W with a WiFi stack. This version was great but had some
 drawbacks (bad WiFi support, huge hardware fingerprint, 200ms latency for each action, and so on. See my talk at
-Volcamp2025 for more details!).
+Volcamp 2025 (FR) or FOSDEM 2026 (EN) for more details!).
 
 This new v2.0 version uses Bluetooth BLE as communication support. It brings a very low latency (<1ms write, <20ms
 read), low energy consumption (the superconductor is not even required anymore), and a much, much simpler code. The
@@ -21,12 +21,10 @@ Bluetooth BLE.
 
 Use the TinyGo CLI to flash the card:
 
-`tinygo flash -monitor -ldflags="-X 'main.chipName=YOUR_TRAIN_NAME' -X -main.reverse=IS_REVERSE" -target=xiao-ble`
+`tinygo flash -monitor -ldflags="-X 'main.chipName=YOUR_TRAIN_NAME'" -target=xiao-ble`
 
 Replace `YOUR_TRAIN_NAME` by the model of your train (eg. `BB92001`). This name **must be unique on your circuit**. If
 you have multiple instance of the same model, add `_1`, `_2` and so on at the end; the frontend will hide it.
-
-Replace `IS_REVERSE` by `true` or `false` to invert train direction (notably if you made a mistake while soldering... :D)
 
 You're ready to go!
 
@@ -38,13 +36,14 @@ To start debug mode (which attach serial UART to show logs on your computer), ad
 
 ## BLE Services & Characteristics
 
-The chip exposes 1 service containing 2 characteristics in a GATT server.
+The chip exposes one service containing three characteristics in a GATT server.
 
 * The service have UUID `97980000-0000-0000-0000-000000000000`
 * The characteristics are the following:
     * Ping Characteristic
         * Identified by UUID `00000000-0000-0000-0000-000000000000`
         * Always returns `0`
+        * On write event, resets the watchdog timer (so you must call it every 3-4s)
     * Speed Characteristic
         * Identified by UUID `10000000-0000-0000-0000-000000000000`
         * Expected payload is a signed integer (in a byte-array style) between `-100` and `100`

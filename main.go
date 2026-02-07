@@ -10,12 +10,14 @@ import (
 
 var chipName string
 var debug string
-var reverse string
 
 func main() {
 	if debug == "true" && machine.Serial.Configure(machine.UARTConfig{BaudRate: 115200}) != nil {
 		panic("failed to configure serial port")
 	}
+
+	_ = machine.Watchdog.Configure(machine.WatchdogConfig{TimeoutMillis: 8000})
+	_ = machine.Watchdog.Start()
 
 	// chipName is defined here because ldflags cannot set value in internal packages.
 	constants.ChipName = fmt.Sprintf("Trainberry::%s", chipName)
@@ -26,11 +28,6 @@ func main() {
 	// Turn on the light to indicate that train is ready to operate
 	controls.SetLight([]byte("on"))
 
-	reverseBool := false
-	if reverse == "true" {
-		reverseBool = true
-	}
-
 	// Loop over events. As the chan is blocking if there's nothing to do, we don't have to do an awful trick with
 	// time.Sleep or something similar.
 	for {
@@ -40,7 +37,10 @@ func main() {
 			controls.SetLight(event.Data)
 			break
 		case constants.SpeedOperation:
-			controls.SetSpeed(event.Data, reverseBool)
+			controls.SetSpeed(event.Data)
+			break
+		case constants.UpdateWatchdog:
+			machine.Watchdog.Update()
 			break
 		}
 	}

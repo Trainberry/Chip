@@ -8,6 +8,10 @@ import (
 // The EventChannel will store all items received from BLE, and will be consumed on CPU idle.
 var EventChannel = make(chan structures.Event, 5)
 
+// Keep state
+var LightState = []byte("on")
+var SpeedState = []byte("0")
+
 var ChipName string
 
 var ForwardPin = machine.D3
@@ -23,4 +27,5 @@ var LightPWM = machine.PWM2
 const (
 	SpeedOperation = iota
 	LightOperation
+	UpdateWatchdog
 )

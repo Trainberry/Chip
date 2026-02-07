@@ -23,14 +23,10 @@ func init() {
 }
 
 // SetSpeed sets the speed of the motor. It takes an integer comprised between -100 (full-backward) and 100 (full-forward).
-func SetSpeed(rawData []byte, reverse bool) {
+func SetSpeed(rawData []byte) {
 	speed, err := strconv.Atoi(string(rawData))
 	if err != nil || speed < -100 || speed > 100 {
 		return
-	}
-
-	if reverse {
-		speed = -speed
 	}
 
 	unsignedSpeed := uint32(speed)

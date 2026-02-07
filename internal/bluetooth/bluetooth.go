@@ -3,6 +3,7 @@ package bluetooth
 import (
 	"test/internal/constants"
 	"test/internal/structures"
+
 	"tinygo.org/x/bluetooth"
 )
 
@@ -25,7 +26,7 @@ func StartBLE() {
 	speedCharacteristicUUID := bluetooth.NewUUID([16]byte{0x10, 0x00, 0x00, 0x00})
 	lightCharacteristicUUID := bluetooth.NewUUID([16]byte{0x20, 0x00, 0x00, 0x00})
 
-	// Set flags on our characteristics : they are readable, writable and writable without acknowledge
+	// Set flags on our characteristics: they are readable, writable and writable without acknowledge
 	basicFlags := bluetooth.CharacteristicReadPermission | bluetooth.CharacteristicWritePermission | bluetooth.CharacteristicWriteWithoutResponsePermission
 
 	err = adapter.AddService(&bluetooth.Service{
@@ -33,28 +34,37 @@ func StartBLE() {
 		Characteristics: []bluetooth.CharacteristicConfig{
 			{
 				UUID:  pingCharacteristicUUID,
-				Flags: bluetooth.CharacteristicReadPermission,
+				Flags: basicFlags,
 				Value: []byte{0x0},
+				WriteEvent: func(client bluetooth.Connection, offset int, value []byte) {
+					constants.EventChannel <- structures.Event{
+						Data:      value,
+						Operation: constants.UpdateWatchdog,
+					}
+				},
 			},
 			{
 				UUID:  speedCharacteristicUUID,
 				Flags: basicFlags,
+				Value: constants.SpeedState,
 				WriteEvent: func(client bluetooth.Connection, offset int, value []byte) {
 					constants.EventChannel <- structures.Event{
 						Data:      value,
 						Operation: constants.SpeedOperation,
 					}
+					constants.SpeedState = value
 				},
 			},
 			{
 				UUID:  lightCharacteristicUUID,
 				Flags: basicFlags,
-				Value: []byte("on"),
+				Value: constants.LightState,
 				WriteEvent: func(client bluetooth.Connection, offset int, value []byte) {
 					constants.EventChannel <- structures.Event{
 						Data:      value,
 						Operation: constants.LightOperation,
 					}
+					constants.LightState = value
 				},
 			},
 		},
